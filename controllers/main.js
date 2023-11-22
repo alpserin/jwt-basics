@@ -8,6 +8,7 @@
 
 require("dotenv").config();
 const request = require("request");
+const { getQuote } = require("../middleware/get-quote");
 
 const jwt = require("jsonwebtoken");
 const CustomAPIError = require("../errors/custom-error");
@@ -38,21 +39,7 @@ const dashboard = (req, res) => {
 
   try {
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
-    request.get(
-      {
-        url: "https://api.api-ninjas.com/v1/quotes",
-        headers: { "X-Api-Key": process.env.NINJA_API_KEY },
-      },
-      (error, response, body) => {
-        body = body.toString("utf8");
-        const quoteData = JSON.parse(body);
-        const quote = quoteData[0].quote;
-        res.status(200).json({
-          msg: `Hello, ${decoded.username}`,
-          secret: `Here is your quote : ${quote}`,
-        });
-      }
-    );
+    getQuote(decoded.username, res);
   } catch (error) {
     throw new CustomAPIError("Not authorized to access this route", 401);
   }
