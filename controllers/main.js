@@ -8,7 +8,7 @@
 
 require("dotenv").config();
 const request = require("request");
-const { getQuote } = require("../middleware/get-quote");
+const auth = require("../middleware/auth");
 
 const jwt = require("jsonwebtoken");
 const CustomAPIError = require("../errors/custom-error");
@@ -28,21 +28,13 @@ const login = async (req, res) => {
   res.status(200).json({ msg: "user created", token });
 };
 
-const dashboard = (req, res) => {
-  const authHeader = req.headers.authorization;
+const dashboard = async (req, res) => {
+  const luckyNumber = Math.floor(Math.random() * 100);
 
-  if (!authHeader || !authHeader.startsWith("Bearer ")) {
-    throw new CustomAPIError("No token provided", 401);
-  }
-
-  const token = authHeader.split(" ")[1];
-
-  try {
-    const decoded = jwt.verify(token, process.env.JWT_SECRET);
-    getQuote(decoded.username, res);
-  } catch (error) {
-    throw new CustomAPIError("Not authorized to access this route", 401);
-  }
+  res.status(200).json({
+    msg: `Hello, ${req.user.username}`,
+    secret: `Here is your lucky number: ${luckyNumber}`,
+  });
 };
 
 module.exports = {
